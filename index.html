@@ -1,0 +1,2542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Our Little Map ♡</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* ============================================================
+   RESET
+============================================================ */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+
+            width: 100%;
+            height: 100%;
+
+            overflow: hidden;
+
+            background: white;
+
+            color: #222;
+        }
+
+        body {
+
+            font-family:
+                "DM Sans",
+                sans-serif;
+        }
+
+
+        /* ============================================================
+   VIEWPORT
+============================================================ */
+
+        #viewport {
+
+            position: fixed;
+
+            inset: 0;
+
+            overflow: hidden;
+
+            background: #fff;
+        }
+
+
+        /*
+   Extremely subtle romantic atmosphere.
+*/
+
+        #viewport::before {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            pointer-events: none;
+
+            background:
+
+                radial-gradient(circle at 50% 45%,
+                    rgba(239, 188, 200, 0.08),
+                    transparent 42%);
+
+            z-index: 1;
+        }
+
+
+        /* ============================================================
+   HUGE CANVAS
+============================================================ */
+
+        #world {
+
+            position: absolute;
+
+            width: 6000px;
+
+            height: 4500px;
+
+            left: 0;
+
+            top: 0;
+
+            transform-origin: 0 0;
+
+            z-index: 2;
+        }
+
+
+        /* ============================================================
+   ROUTE SVG
+============================================================ */
+
+        #routeLayer {
+
+            position: absolute;
+
+            width: 6000px;
+
+            height: 4500px;
+
+            left: 0;
+
+            top: 0;
+
+            overflow: visible;
+
+            pointer-events: none;
+        }
+
+
+        .route-shadow {
+
+            fill: none;
+
+            stroke:
+                rgba(203, 113, 135, 0.07);
+
+            stroke-width: 10;
+
+            stroke-linecap: round;
+
+            stroke-linejoin: round;
+
+            filter: blur(4px);
+        }
+
+
+        .route {
+
+            fill: none;
+
+            stroke:
+                #d39aaa;
+
+            stroke-width: 3;
+
+            stroke-linecap: round;
+
+            stroke-linejoin: round;
+
+            stroke-dasharray:
+                2 15;
+
+            opacity:
+                0.72;
+        }
+
+
+        .route.animate {
+
+            animation:
+                routeFlow 2s linear infinite;
+        }
+
+
+        @keyframes routeFlow {
+
+            to {
+
+                stroke-dashoffset:
+                    -70;
+
+            }
+        }
+
+
+        /* ============================================================
+   LOCATION
+============================================================ */
+
+        .location {
+
+            position: absolute;
+
+            width: 310px;
+
+            transform:
+                translate(-50%, -50%);
+
+            text-align: center;
+
+            cursor: pointer;
+
+            transition:
+                opacity .6s ease;
+        }
+
+
+        /* ============================================================
+   PHOTO
+============================================================ */
+
+        .photo-frame {
+
+            width: 210px;
+
+            height: 150px;
+
+            margin:
+                0 auto 25px;
+
+            position: relative;
+
+            overflow: hidden;
+
+            background:
+                #f7f3f4;
+
+            border-radius: 4px;
+
+            box-shadow:
+                0 18px 45px rgba(0, 0, 0, .09);
+
+            transition:
+                transform .5s ease,
+                box-shadow .5s ease;
+        }
+
+
+        .photo-frame img {
+
+            width: 100%;
+
+            height: 100%;
+
+            display: block;
+
+            object-fit: cover;
+        }
+
+
+        .photo-placeholder {
+
+            position: absolute;
+
+            inset: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                linear-gradient(135deg,
+                    #fbf8f9,
+                    #f4edef);
+
+            color:
+                #b78a95;
+        }
+
+
+        .photo-placeholder .heart {
+
+            font-family:
+                "Cormorant Garamond",
+                serif;
+
+            font-size: 26px;
+
+            margin-bottom: 5px;
+
+            opacity:
+                .65;
+        }
+
+
+        .photo-placeholder span {
+
+            font-size: 8px;
+
+            letter-spacing: 2.5px;
+
+            text-transform: uppercase;
+
+            opacity:
+                .65;
+        }
+
+
+        .location:hover .photo-frame {
+
+            transform:
+                translateY(-5px);
+
+            box-shadow:
+                0 22px 55px rgba(0, 0, 0, .12);
+        }
+
+
+        /* ============================================================
+   DOT
+============================================================ */
+
+        .location-dot {
+
+            width: 14px;
+
+            height: 14px;
+
+            margin:
+                0 auto 14px;
+
+            border-radius: 50%;
+
+            background:
+                #c66d84;
+
+            position: relative;
+
+            box-shadow:
+
+                0 0 0 7px rgba(198, 109, 132, .10),
+
+                0 0 0 14px rgba(198, 109, 132, .035);
+        }
+
+
+        .location-dot::after {
+
+            content: "";
+
+            position: absolute;
+
+            inset: -4px;
+
+            border:
+                1px solid rgba(198, 109, 132, .25);
+
+            border-radius: 50%;
+
+            animation:
+                pulse 2.7s ease-in-out infinite;
+        }
+
+
+        @keyframes pulse {
+
+            0% {
+
+                transform:
+                    scale(.8);
+
+                opacity:
+                    .4;
+            }
+
+            50% {
+
+                transform:
+                    scale(1.35);
+
+                opacity:
+                    0;
+            }
+
+            100% {
+
+                transform:
+                    scale(.8);
+
+                opacity:
+                    .4;
+            }
+        }
+
+
+        /* ============================================================
+   TEXT
+============================================================ */
+
+        .location-date {
+
+            font-size: 10px;
+
+            letter-spacing:
+                2.8px;
+
+            text-transform:
+                uppercase;
+
+            color:
+                #a16f7b;
+
+            margin-bottom:
+                7px;
+        }
+
+
+        .location-name {
+
+            font-family:
+                "Cormorant Garamond",
+                serif;
+
+            font-size:
+                31px;
+
+            line-height:
+                1;
+
+            font-weight:
+                500;
+
+            color:
+                #272427;
+
+            margin-bottom:
+                8px;
+        }
+
+
+        .location-subtitle {
+
+            font-size:
+                10px;
+
+            letter-spacing:
+                .4px;
+
+            color:
+                #aaa;
+
+            margin-bottom:
+                7px;
+        }
+
+
+        .location-memory {
+
+            font-family:
+                "Cormorant Garamond",
+                serif;
+
+            font-size:
+                17px;
+
+            font-style:
+                italic;
+
+            color:
+                #888;
+        }
+
+
+        /* ============================================================
+   CURRENT LOCATION
+============================================================ */
+
+        .location.current {
+
+            opacity:
+                1;
+        }
+
+
+        .location.current .location-name {
+
+            color:
+                #b9536d;
+        }
+
+
+        .location.current .location-dot {
+
+            background:
+                #b9536d;
+
+            box-shadow:
+
+                0 0 0 8px rgba(185, 83, 109, .12),
+
+                0 0 0 16px rgba(185, 83, 109, .035);
+        }
+
+
+        /* ============================================================
+   VISITED LOCATIONS
+============================================================ */
+
+        .location.visited {
+
+            opacity:
+                .55;
+        }
+
+
+        /* ============================================================
+   GALLERY
+============================================================ */
+
+        .gallery {
+
+            position: absolute;
+
+            left: 50%;
+            top: 100%;
+
+            width: 350px;
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 8px;
+
+            opacity: 0;
+
+            pointer-events: none;
+
+            transform:
+                translate(-50%, 25px) scale(.95);
+
+            transition:
+                opacity .45s ease,
+                transform .45s ease;
+        }
+
+
+        /* ============================================================
+   SCROLLABLE OPEN MEMORY
+============================================================ */
+
+        /*
+   When the current memory is opened,
+   the memory card becomes vertically scrollable.
+
+   The giant map itself does NOT scroll.
+*/
+
+        .location.open {
+
+            max-height: 380px;
+
+            overflow-y: auto;
+            overflow-x: hidden;
+
+            box-sizing: border-box;
+
+            scrollbar-width: thin;
+
+            scrollbar-color:
+                rgba(198, 109, 132, .35) transparent;
+        }
+
+
+        /* Chrome / Edge scrollbar */
+
+        .location.open::-webkit-scrollbar {
+
+            width: 5px;
+        }
+
+
+        .location.open::-webkit-scrollbar-track {
+
+            background: transparent;
+        }
+
+
+        .location.open::-webkit-scrollbar-thumb {
+
+            background:
+                rgba(198, 109, 132, .35);
+
+            border-radius: 10px;
+        }
+
+
+        /* ============================================================
+   SCROLLABLE OPEN MEMORY
+============================================================ */
+
+        .location.open {
+
+            max-height: 380px;
+
+            /* Allow scrolling in BOTH directions */
+            overflow-x: auto;
+            overflow-y: auto;
+
+            box-sizing: border-box;
+
+            scrollbar-width: thin;
+
+            scrollbar-color:
+                rgba(198, 109, 132, .35) transparent;
+        }
+
+
+        /* ============================================================
+   CHROME / EDGE SCROLLBAR
+============================================================ */
+
+        .location.open::-webkit-scrollbar {
+
+            width: 5px;
+            height: 5px;
+        }
+
+
+        .location.open::-webkit-scrollbar-track {
+
+            background: transparent;
+        }
+
+
+        .location.open::-webkit-scrollbar-thumb {
+
+            background:
+                rgba(198, 109, 132, .35);
+
+            border-radius: 10px;
+        }
+
+
+        /* ============================================================
+   OPEN GALLERY
+============================================================ */
+
+        .location.open .gallery {
+
+            position: relative;
+
+            left: auto;
+            top: auto;
+
+            width: 350px;
+            min-width: 400px;
+
+            margin:
+                18px auto 20px;
+
+            display: flex;
+
+            flex-direction: row;
+
+            flex-wrap: nowrap;
+
+            justify-content: flex-start;
+
+            gap: 8px;
+
+            opacity: 1;
+
+            pointer-events: auto;
+
+            transform:
+                translateY(0) scale(1);
+        }
+
+
+        /* ============================================================
+   GALLERY PHOTOS
+============================================================ */
+
+        .gallery-photo {
+
+            width: 300px;
+            height: 200px;
+
+            /*
+       Prevent the three images from shrinking
+       when the gallery is wider than the memory card.
+    */
+            flex:
+                0 0 105px;
+
+            overflow: hidden;
+
+            border-radius: 3px;
+
+            background:
+                #f5f1f2;
+
+            box-shadow:
+                0 8px 20px rgba(0, 0, 0, .12);
+        }
+
+
+        .gallery-photo img {
+
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+        }
+
+        /* ============================================================
+   TOP PROGRESS
+============================================================ */
+
+        #progress {
+
+            position: fixed;
+
+            top: 30px;
+
+            left: 50%;
+
+            transform:
+                translateX(-50%);
+
+            z-index: 50;
+
+            font-size: 10px;
+
+            letter-spacing:
+                3px;
+
+            text-transform:
+                uppercase;
+
+            color:
+                #a87984;
+        }
+
+
+        #progress span {
+
+            color:
+                #c66d84;
+        }
+
+
+        /* ============================================================
+   NEXT BUTTON
+============================================================ */
+
+        #nextButton {
+
+            position: fixed;
+
+            right: 42px;
+
+            bottom: 38px;
+
+            z-index: 50;
+
+            border: none;
+
+            background: transparent;
+
+            font-family:
+                "DM Sans",
+                sans-serif;
+
+            font-size: 11px;
+
+            letter-spacing:
+                2px;
+
+            text-transform:
+                uppercase;
+
+            color:
+                #555;
+
+            cursor: pointer;
+
+            padding: 12px 5px;
+
+            transition:
+                color .3s ease,
+                opacity .5s ease;
+        }
+
+
+        #nextButton::after {
+
+            content:
+                "→";
+
+            display:
+                inline-block;
+
+            margin-left:
+                12px;
+
+            font-size:
+                18px;
+
+            color:
+                #c66d84;
+
+            transition:
+                transform .3s ease;
+        }
+
+
+        #nextButton:hover {
+
+            color:
+                #c66d84;
+        }
+
+
+        #nextButton:hover::after {
+
+            transform:
+                translateX(5px);
+        }
+
+
+        /* ============================================================
+   LITTLE HEART
+============================================================ */
+
+        #tinyHeart {
+
+            position: fixed;
+
+            left: 42px;
+
+            bottom: 39px;
+
+            z-index: 50;
+
+            font-family:
+                "Cormorant Garamond",
+                serif;
+
+            font-size:
+                22px;
+
+            color:
+                #d18a99;
+
+            opacity:
+                .65;
+        }
+
+
+        /* ============================================================
+   FINAL SCREEN
+============================================================ */
+
+        #finalScreen {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 100;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                white;
+
+            opacity:
+                0;
+
+            pointer-events:
+                none;
+
+            transition:
+                opacity 2.2s ease;
+        }
+
+
+        #finalScreen.show {
+
+            opacity:
+                1;
+
+            pointer-events:
+                auto;
+        }
+
+
+        .final-small {
+
+            font-size:
+                10px;
+
+            letter-spacing:
+                4px;
+
+            text-transform:
+                uppercase;
+
+            color:
+                #b67b87;
+
+            margin-bottom:
+                20px;
+
+            opacity:
+                0;
+
+            transform:
+                translateY(12px);
+
+            transition:
+                opacity 1.2s ease .7s,
+                transform 1.2s ease .7s;
+        }
+
+
+        #finalScreen.show .final-small {
+
+            opacity:
+                1;
+
+            transform:
+                translateY(0);
+        }
+
+
+        .final-title {
+
+            font-family:
+                "Cormorant Garamond",
+                serif;
+
+            font-size:
+                clamp(65px,
+                    10vw,
+                    140px);
+
+            font-weight:
+                400;
+
+            line-height:
+                .9;
+
+            color:
+                #282428;
+
+            text-align:
+                center;
+
+            opacity:
+                0;
+
+            transform:
+                translateY(15px);
+
+            transition:
+                opacity 1.5s ease 1s,
+                transform 1.5s ease 1s;
+        }
+
+        .title-heart {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 0.65em;
+            color: #c76e84;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        #finalScreen.show .final-title {
+
+            opacity:
+                1;
+
+            transform:
+                translateY(0);
+        }
+
+
+        .final-heart {
+
+            margin-top:
+                28px;
+
+            font-family:
+                "Cormorant Garamond",
+                serif;
+
+            font-size:
+                25px;
+
+            color:
+                #c76e84;
+
+            opacity:
+                0;
+
+            transition:
+                opacity 1.5s ease 1.6s;
+        }
+
+
+        #finalScreen.show .final-heart {
+
+            opacity:
+                .8;
+        }
+
+
+        /* ============================================================
+   MOBILE
+============================================================ */
+
+        @media(max-width:700px) {
+
+            #progress {
+
+                top:
+                    22px;
+            }
+
+            #nextButton {
+
+                right:
+                    20px;
+
+                bottom:
+                    24px;
+            }
+
+            #tinyHeart {
+
+                left:
+                    22px;
+
+                bottom:
+                    27px;
+            }
+
+            .location {
+
+                width:
+                    240px;
+            }
+
+            .photo-frame {
+
+                width:
+                    165px;
+
+                height:
+                    118px;
+            }
+
+            .location-name {
+
+                font-size:
+                    25px;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+
+    <!-- ============================================================
+     VIEWPORT
+============================================================ -->
+
+    <div id="viewport">
+
+
+        <!-- ========================================================
+         GIANT BLANK CANVAS
+    ========================================================= -->
+
+        <div id="world">
+
+
+            <!-- ====================================================
+             DOTTED ROUTE
+        ===================================================== -->
+
+            <svg id="routeLayer" viewBox="0 0 6000 4500">
+
+                <path id="routeShadow" class="route-shadow"></path>
+
+                <path id="route" class="route"></path>
+
+            </svg>
+
+
+            <!-- Locations inserted here -->
+
+        </div>
+
+
+        <!-- ========================================================
+         UI
+    ========================================================= -->
+
+        <div id="progress">
+
+            MEMORY
+            <span id="currentNumber">01</span>
+            / 07
+
+        </div>
+
+
+        <div id="tinyHeart">
+            ♡
+        </div>
+
+
+        <button id="nextButton">
+            Next memory
+        </button>
+
+
+    </div>
+
+
+    <!-- ============================================================
+     FINAL BIRTHDAY SCREEN
+============================================================ -->
+
+    <div id="finalScreen">
+
+        <div class="final-small">
+
+            and there is still so much more
+
+        </div>
+
+        <div class="final-title">
+
+            Happy Birthday Bujji <br> I Love you<span class="title-heart">♡</span>
+
+        </div>
+
+        <div class="final-heart">
+
+            ♡
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        /* ============================================================
+           MEMORY DATA
+        ============================================================ */
+
+        /*
+           IMPORTANT:
+        
+           These positions are NOT being calculated from latitude
+           and longitude anymore.
+        
+           They are deliberate cinematic positions on a huge canvas.
+        
+           That means:
+        
+           - close-up scenes can be anywhere
+           - final map can be beautifully spread out
+           - locations won't bunch together
+        */
+
+
+        const memories = [
+
+            {
+                name:
+                    "GRIET",
+
+                subtitle:
+                    "Gokaraju Rangaraju Institute of Engineering & Technology",
+
+                date:
+                    "Where it all started",
+
+                memory:
+                    "the beginning of our little story",
+
+                x:
+                    900,
+
+                y:
+                    900,
+
+                image:
+                    "images/griet-main.jpeg",
+
+                gallery: [
+                    "images/griet-main.jpeg",
+                    "images/griet-2.jpeg",
+                    "images/griet-3.jpeg"
+                ]
+            },
+
+
+            {
+                name:
+                    "Vertex Pleasant - Vindhya's House",
+
+                subtitle:
+                    "Nizampet",
+
+                date:
+                    "The beginning of us",
+
+                memory:
+                    "where we started",
+
+                x:
+                    1900,
+
+                y:
+                    1350,
+
+                image:
+                    "images/vertex-main.jpeg",
+
+                gallery: [
+                    "images/vertex-main.jpeg",
+                    "images/vertex-2.jpeg",
+                    "images/vertex-3.jpeg"
+                ]
+            },
+
+
+            {
+                name:
+                    "Lake Shore Mall",
+
+                subtitle:
+                    "Y Junction",
+
+                date:
+                    "Our first date",
+
+                memory:
+                    "our first little adventure - 19-01-2026",
+
+                x:
+                    3200,
+
+                y:
+                    950,
+
+                image:
+                    "images/lakeshore-main.jpeg",
+
+                gallery: [
+                    "images/lakeshore-main.jpeg",
+                    "images/lakeshore-2.jpeg",
+                    "images/lakeshore-3.jpeg"
+                ]
+            },
+
+
+            {
+                name:
+                    "Sobremesa",
+
+                subtitle:
+                    "Jubilee Hills",
+
+                date:
+                    "13-02-2026",
+
+                memory:
+                    "our first Valentine's Day",
+
+                x:
+                    4400,
+
+                y:
+                    1550,
+
+                image:
+                    "images/sobremesa-main.jpeg",
+
+                gallery: [
+                    "images/sobremesa-main.jpeg",
+                    "images/sobremesa-2.jpeg",
+                    "images/sobremesa-3.jpeg"
+                ]
+            },
+
+
+            {
+                name:
+                    "Nexus Mall",
+
+                subtitle:
+                    "Kukatpally",
+
+                date:
+                    "Our shopping date",
+
+                memory:
+                    "just us, wandering around",
+
+                x:
+                    3500,
+
+                y:
+                    2600,
+
+                image:
+                    "images/nexus-main.jpeg",
+
+                gallery: [
+                    "images/nexus-main.jpeg",
+                    "images/nexus-2.jpeg",
+                    "images/nexus-3.jpeg"
+                ]
+            },
+
+
+            {
+                name:
+                    "Theory Café",
+
+                subtitle:
+                    "Jubilee Hills",
+
+                date:
+                    "Our group date",
+
+                memory:
+                    "with all the people around us",
+
+                x:
+                    1800,
+
+                y:
+                    3150,
+
+                image:
+                    "images/theory-main.jpeg",
+
+                gallery: [
+                    "images/theory-main.jpeg",
+                    "images/theory-2.jpeg",
+                    "images/theory-3.jpeg"
+                ]
+            },
+
+
+            {
+                name:
+                    "AMB Mall",
+
+                subtitle:
+                    "Sarath City Capital Mall",
+
+                date:
+                    "Six month anniversary",
+
+                memory:
+                    "six months of us",
+
+                x:
+                    4400,
+
+                y:
+                    3500,
+
+                image:
+                    "images/amb-main.jpeg",
+
+                gallery: [
+                    "images/amb-main.jpeg",
+                    "images/amb-2.jpeg",
+                    "images/amb-3.jpeg"
+                ]
+            }
+
+        ];
+
+
+        /* ============================================================
+           CAMERA SETTINGS
+        ============================================================ */
+
+
+        /*
+           THIS is the important part.
+        
+           During every memory:
+        
+               CLOSEUP_SCALE = 1.55
+        
+           So the location occupies the screen.
+        
+           The other locations are somewhere else
+           on the giant canvas and therefore aren't visible.
+        */
+
+        const CLOSEUP_SCALE =
+            1.55;
+
+
+        /*
+           Final zoom-out.
+        
+           The final map is deliberately kept large.
+        */
+
+        const FINAL_SCALE =
+            0.55;
+
+
+        /*
+           Canvas dimensions.
+        */
+
+        const WORLD_WIDTH =
+            6000;
+
+        const WORLD_HEIGHT =
+            4500;
+
+
+        /* ============================================================
+           DOM
+        ============================================================ */
+
+        const world =
+            document.getElementById(
+                "world"
+            );
+
+        const route =
+            document.getElementById(
+                "route"
+            );
+
+        const routeShadow =
+            document.getElementById(
+                "routeShadow"
+            );
+
+        const nextButton =
+            document.getElementById(
+                "nextButton"
+            );
+
+        const currentNumber =
+            document.getElementById(
+                "currentNumber"
+            );
+
+        const finalScreen =
+            document.getElementById(
+                "finalScreen"
+            );
+
+
+        /* ============================================================
+           CREATE PHOTO
+        ============================================================ */
+
+        function createPhoto(
+            path,
+            className
+        ) {
+
+            const wrapper =
+                document.createElement(
+                    "div"
+                );
+
+            wrapper.className =
+                className;
+
+
+            const img =
+                document.createElement(
+                    "img"
+                );
+
+            img.src =
+                path;
+
+            img.alt =
+                "";
+
+
+            const placeholder =
+                document.createElement(
+                    "div"
+                );
+
+            placeholder.className =
+                "photo-placeholder";
+
+
+            placeholder.innerHTML = `
+
+        <div class="heart">
+            ♡
+        </div>
+
+        <span>
+            your photo
+        </span>
+
+    `;
+
+
+            img.onload = () => {
+
+                placeholder.style.display =
+                    "none";
+
+            };
+
+
+            img.onerror = () => {
+
+                img.style.display =
+                    "none";
+
+                placeholder.style.display =
+                    "flex";
+
+            };
+
+
+            wrapper.appendChild(
+                img
+            );
+
+            wrapper.appendChild(
+                placeholder
+            );
+
+
+            return wrapper;
+        }
+
+
+        /* ============================================================
+           CREATE LOCATIONS
+        ============================================================ */
+
+        memories.forEach(
+            (memory, index) => {
+
+
+                const location =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                location.className =
+                    "location";
+
+
+                location.dataset.index =
+                    index;
+
+
+                /*
+                   Place directly on the huge canvas.
+                */
+
+                location.style.left =
+                    memory.x + "px";
+
+
+                location.style.top =
+                    memory.y + "px";
+
+
+                /* ====================================================
+                   HERO PHOTO
+                ==================================================== */
+
+                location.appendChild(
+                    createPhoto(
+                        memory.image,
+                        "photo-frame"
+                    )
+                );
+
+
+                /* ====================================================
+                   DOT
+                ==================================================== */
+
+                const dot =
+                    document.createElement(
+                        "div"
+                    );
+
+                dot.className =
+                    "location-dot";
+
+                location.appendChild(
+                    dot
+                );
+
+
+                /* ====================================================
+                   DATE
+                ==================================================== */
+
+                const date =
+                    document.createElement(
+                        "div"
+                    );
+
+                date.className =
+                    "location-date";
+
+                date.textContent =
+                    memory.date;
+
+                location.appendChild(
+                    date
+                );
+
+
+                /* ====================================================
+                   NAME
+                ==================================================== */
+
+                const name =
+                    document.createElement(
+                        "div"
+                    );
+
+                name.className =
+                    "location-name";
+
+                name.textContent =
+                    memory.name;
+
+                location.appendChild(
+                    name
+                );
+
+
+                /* ====================================================
+                   SUBTITLE
+                ==================================================== */
+
+                const subtitle =
+                    document.createElement(
+                        "div"
+                    );
+
+                subtitle.className =
+                    "location-subtitle";
+
+                subtitle.textContent =
+                    memory.subtitle;
+
+                location.appendChild(
+                    subtitle
+                );
+
+
+                /* ====================================================
+                   MEMORY
+                ==================================================== */
+
+                const memoryText =
+                    document.createElement(
+                        "div"
+                    );
+
+                memoryText.className =
+                    "location-memory";
+
+                memoryText.textContent =
+                    memory.memory;
+
+                location.appendChild(
+                    memoryText
+                );
+
+
+                /* ====================================================
+                   GALLERY
+                ==================================================== */
+
+                const gallery =
+                    document.createElement(
+                        "div"
+                    );
+
+                gallery.className =
+                    "gallery";
+
+
+                memory.gallery.forEach(
+                    image => {
+
+                        gallery.appendChild(
+                            createPhoto(
+                                image,
+                                "gallery-photo"
+                            )
+                        );
+
+                    }
+                );
+
+
+                location.appendChild(
+                    gallery
+                );
+
+
+                /* ====================================================
+                   ADD TO WORLD
+                ==================================================== */
+
+                world.appendChild(
+                    location
+                );
+
+
+                /* ====================================================
+                   CLICK
+                ==================================================== */
+
+                location.addEventListener(
+                    "click",
+                    event => {
+
+
+                        event.stopPropagation();
+
+
+                        /*
+                           Only current location
+                           can open photos.
+                        */
+
+                        if (
+                            index !==
+                            currentIndex
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        document
+                            .querySelectorAll(
+                                ".location.open"
+                            )
+                            .forEach(
+                                item => {
+
+                                    if (
+                                        item !==
+                                        location
+                                    ) {
+
+                                        item.classList
+                                            .remove(
+                                                "open"
+                                            );
+
+                                    }
+
+                                }
+                            );
+
+
+                        location.classList.toggle(
+                            "open"
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        /* ============================================================
+           CREATE ROUTE
+        ============================================================ */
+
+        function createRoute() {
+
+
+            let path =
+                "";
+
+
+            for (
+                let i = 0;
+                i < memories.length - 1;
+                i++
+            ) {
+
+
+                const current =
+                    memories[i];
+
+
+                const next =
+                    memories[i + 1];
+
+
+                if (i === 0) {
+
+                    path +=
+                        `M ${current.x} ${current.y} `;
+
+                }
+
+
+                const dx =
+                    next.x -
+                    current.x;
+
+
+                const dy =
+                    next.y -
+                    current.y;
+
+
+                const distance =
+                    Math.sqrt(
+                        dx * dx +
+                        dy * dy
+                    );
+
+
+                const midX =
+                    (
+                        current.x +
+                        next.x
+                    ) / 2;
+
+
+                const midY =
+                    (
+                        current.y +
+                        next.y
+                    ) / 2;
+
+
+                /*
+                   Organic curve.
+        
+                   This prevents the route from
+                   looking like a rigid GPS line.
+                */
+
+                const curve =
+                    Math.min(
+                        distance * .20,
+                        180
+                    );
+
+
+                const perpendicularX =
+                    -dy /
+                    distance *
+                    curve;
+
+
+                const perpendicularY =
+                    dx /
+                    distance *
+                    curve;
+
+
+                const controlX =
+                    midX +
+                    perpendicularX;
+
+
+                const controlY =
+                    midY +
+                    perpendicularY;
+
+
+                path +=
+                    `
+            Q
+            ${controlX}
+            ${controlY}
+            ${next.x}
+            ${next.y}
+            `;
+
+            }
+
+
+            route.setAttribute(
+                "d",
+                path
+            );
+
+
+            routeShadow.setAttribute(
+                "d",
+                path
+            );
+
+        }
+
+
+        /* ============================================================
+           CURRENT MEMORY
+        ============================================================ */
+
+        let currentIndex =
+            0;
+
+
+        /* ============================================================
+           UPDATE LOCATION STATES
+        ============================================================ */
+
+        function updateLocations() {
+
+
+            const locations =
+                document.querySelectorAll(
+                    ".location"
+                );
+
+
+            locations.forEach(
+                (location, index) => {
+
+
+                    location.classList.remove(
+                        "current"
+                    );
+
+
+                    location.classList.remove(
+                        "visited"
+                    );
+
+
+                    if (
+                        index <
+                        currentIndex
+                    ) {
+
+                        location.classList.add(
+                            "visited"
+                        );
+
+                    }
+
+
+                    if (
+                        index ===
+                        currentIndex
+                    ) {
+
+                        location.classList.add(
+                            "current"
+                        );
+
+                    }
+
+                }
+            );
+
+
+            currentNumber.textContent =
+                String(
+                    currentIndex + 1
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+        }
+
+
+        /* ============================================================
+           CAMERA — CLOSE UP
+        ============================================================ */
+
+        function moveToMemory(
+            index,
+            duration = 2300
+        ) {
+
+
+            const memory =
+                memories[index];
+
+
+            const centerX =
+                window.innerWidth /
+                2;
+
+
+            const centerY =
+                window.innerHeight /
+                2;
+
+
+            /*
+               Scale first, then compensate
+               translation.
+        
+               This is what keeps the current
+               memory centered.
+            */
+
+            const translateX =
+                centerX -
+                memory.x *
+                CLOSEUP_SCALE;
+
+
+            const translateY =
+                centerY -
+                memory.y *
+                CLOSEUP_SCALE;
+
+
+            world.style.transition =
+                `
+        transform
+        ${duration}ms
+        cubic-bezier(
+            .77,
+            0,
+            .18,
+            1
+        )
+        `;
+
+
+            world.style.transform =
+                `
+        translate(
+            ${translateX}px,
+            ${translateY}px
+        )
+        scale(
+            ${CLOSEUP_SCALE}
+        )
+        `;
+
+        }
+
+
+        /* ============================================================
+           NEXT MEMORY
+        ============================================================ */
+
+        function nextMemory() {
+
+
+            /*
+               Final location reached.
+            */
+
+            if (
+                currentIndex >=
+                memories.length - 1
+            ) {
+
+                finishJourney();
+
+                return;
+
+            }
+
+
+            /*
+               Close current gallery.
+            */
+
+            document
+                .querySelectorAll(
+                    ".location.open"
+                )
+                .forEach(
+                    location => {
+
+                        location.classList.remove(
+                            "open"
+                        );
+
+                    }
+                );
+
+
+            /*
+               Move to next.
+            */
+
+            currentIndex++;
+
+
+            updateLocations();
+
+
+            /*
+               Smooth cinematic camera travel.
+            */
+
+            moveToMemory(
+                currentIndex,
+                2500
+            );
+
+
+            route.classList.add(
+                "animate"
+            );
+
+        }
+
+
+        /* ============================================================
+           FINAL SEQUENCE
+        ============================================================ */
+
+        function finishJourney() {
+
+
+            /*
+               Disable button.
+            */
+
+            nextButton.style.pointerEvents =
+                "none";
+
+            nextButton.style.opacity =
+                "0";
+
+
+            /*
+               Stay at AMB for a moment.
+            */
+
+            currentIndex =
+                memories.length - 1;
+
+
+            updateLocations();
+
+
+            /*
+               Wait before pulling out.
+            */
+
+            setTimeout(
+                () => {
+
+                    revealWholeMap();
+
+                },
+                2200
+            );
+
+        }
+
+
+        /* ============================================================
+           FINAL MAP REVEAL
+        ============================================================ */
+
+        function revealWholeMap() {
+            /* ============================================================
+               FINAL MAP REVEAL
+            ============================================================ */
+
+            /*
+               Find the actual bounds of all 7 memories.
+               This lets the camera frame the memories themselves,
+               rather than the entire empty 6000 × 4500 canvas.
+            */
+
+            const xs = memories.map(
+                memory => memory.x
+            );
+
+            const ys = memories.map(
+                memory => memory.y
+            );
+
+
+            const minX =
+                Math.min(...xs);
+
+            const maxX =
+                Math.max(...xs);
+
+            const minY =
+                Math.min(...ys);
+
+            const maxY =
+                Math.max(...ys);
+
+
+            /*
+               Center of the actual memory spread.
+            */
+
+            const memoriesCenterX =
+                (minX + maxX) / 2;
+
+            const memoriesCenterY =
+                (minY + maxY) / 2;
+
+
+            /*
+               Width and height of the memory spread.
+            */
+
+            const memoriesWidth =
+                maxX - minX;
+
+            const memoriesHeight =
+                maxY - minY;
+
+
+            /*
+               We want ALL locations visible.
+        
+               The available screen area gets some breathing room
+               so that the outer memories don't touch the edges.
+            */
+
+            const horizontalPadding =
+                180;
+
+            const verticalPadding =
+                220;
+
+
+            const availableWidth =
+                window.innerWidth -
+                horizontalPadding;
+
+            const availableHeight =
+                window.innerHeight -
+                verticalPadding;
+
+
+            /*
+               Calculate the scale required to fit everything.
+            */
+
+            const scaleX =
+                availableWidth /
+                memoriesWidth;
+
+            const scaleY =
+                availableHeight /
+                memoriesHeight;
+
+
+            /*
+               Use the smaller scale so BOTH dimensions fit.
+            */
+
+            let finalScale =
+                Math.min(
+                    scaleX,
+                    scaleY
+                );
+
+
+            /*
+               Give the map a little extra breathing room.
+        
+               This is intentionally smaller than before.
+            */
+
+            finalScale *= 0.78;
+
+
+            /*
+               Prevent it from becoming too large.
+            */
+
+            finalScale =
+                Math.min(
+                    finalScale,
+                    0.75
+                );
+
+
+            /*
+               And make sure it actually pulls away
+               enough on very large screens.
+            */
+
+            finalScale =
+                Math.min(
+                    finalScale,
+                    0.68
+                );
+
+
+            /*
+               Position the memory spread in the center
+               of the screen.
+            */
+
+            const translateX =
+                window.innerWidth / 2 -
+                memoriesCenterX *
+                finalScale;
+
+
+            const translateY =
+                window.innerHeight / 2 -
+                memoriesCenterY *
+                finalScale;
+
+
+            /*
+               CINEMATIC PULL BACK
+            */
+
+            world.style.transition =
+                `
+        transform
+        5.5s
+        cubic-bezier(
+            .77,
+            0,
+            .18,
+            1
+        )
+        `;
+
+
+            world.style.transform =
+                `
+        translate(
+            ${translateX}px,
+            ${translateY}px
+        )
+        scale(
+            ${finalScale}
+        )
+        `;
+
+
+            /*
+               Keep the complete map visible
+               for 6 seconds.
+            */
+
+            setTimeout(
+                () => {
+
+                    showBirthday();
+
+                },
+                6000
+            );
+        }
+
+
+        /* ============================================================
+           BIRTHDAY SCREEN
+        ============================================================ */
+
+        function showBirthday() {
+
+            finalScreen.classList.add(
+                "show"
+            );
+
+        }
+
+
+        /* ============================================================
+           OUTSIDE CLICK
+        ============================================================ */
+
+        document.addEventListener(
+            "click",
+            () => {
+
+                document
+                    .querySelectorAll(
+                        ".location.open"
+                    )
+                    .forEach(
+                        location => {
+
+                            location.classList.remove(
+                                "open"
+                            );
+
+                        }
+                    );
+
+            }
+        );
+
+
+        /* ============================================================
+           KEYBOARD
+        ============================================================ */
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+
+                if (
+                    event.key ===
+                    "ArrowRight"
+                    ||
+                    event.key ===
+                    " "
+                ) {
+
+                    event.preventDefault();
+
+                    nextMemory();
+
+                }
+
+            }
+        );
+
+
+        /* ============================================================
+           BUTTON
+        ============================================================ */
+
+        nextButton.addEventListener(
+            "click",
+            event => {
+
+                event.stopPropagation();
+
+                nextMemory();
+
+            }
+        );
+
+
+        /* ============================================================
+           INITIALIZATION
+        ============================================================ */
+
+        createRoute();
+
+        updateLocations();
+
+
+        /*
+           START:
+        
+           The world is NOT zoomed out.
+        
+           We immediately position the camera
+           on GRIET at close-up scale.
+        */
+
+        requestAnimationFrame(
+            () => {
+
+                moveToMemory(
+                    0,
+                    0
+                );
+
+            }
+        );
+
+
+        /* ============================================================
+           RESIZE
+        ============================================================ */
+
+        window.addEventListener(
+            "resize",
+            () => {
+
+
+                /*
+                   Keep current memory centered
+                   during normal journey.
+                */
+
+                if (
+                    currentIndex <
+                    memories.length
+                ) {
+
+                    moveToMemory(
+                        currentIndex,
+                        400
+                    );
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
